@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { useDesignStore, type Tool } from '../stores/useDesignStore';
-import {
-  SYMBOL_CATEGORIES,
-  getByCategory,
-  buildSvgString,
-  type SymbolCategory,
-  type MEPSymbol,
-} from '../symbols/index';
+import { useSymbolLibrary, type ExtendedCategory } from '../hooks/useSymbolLibrary';
+import type { MEPSymbol } from '../symbols/index';
 
 const TOOLS: { id: Tool; label: string; icon: string }[] = [
   { id: 'select',  label: 'SELECT',  icon: '⮚' },
@@ -19,17 +14,9 @@ const TOOLS: { id: Tool; label: string; icon: string }[] = [
   { id: 'pan',     label: 'PAN',     icon: '⬡' },
 ];
 
-const CATEGORY_COLORS: Record<SymbolCategory, string> = {
-  HVAC:       '#00d4ff',
-  PIPING:     '#22c55e',
-  CONTROLS:   '#8b5cf6',
-  ELECTRICAL: '#f59e0b',
-  FIRE:       '#f43f5e',
-};
-
 // Inline SVG thumbnail component — renders the symbol using the SVG path data
-function SymbolThumb({ symbol, active }: { symbol: MEPSymbol; active: boolean }) {
-  const svgStr = buildSvgString(symbol, 'currentColor');
+function SymbolThumb({ symbol, active, buildSvg }: { symbol: MEPSymbol; active: boolean; buildSvg: (s: MEPSymbol, c?: string) => string }) {
+  const svgStr = buildSvg(symbol, 'currentColor');
   return (
     <div
       className={`sym-thumb ${active ? 'active' : ''}`}
@@ -50,9 +37,11 @@ export function LeftSidebar() {
     layers,
   } = useDesignStore();
 
-  const [expandedCats, setExpandedCats] = useState<Set<SymbolCategory>>(new Set(['HVAC']));
+  const lib = useSymbolLibrary();
+  const [expandedCats, setExpandedCats] = useState<Set<ExtendedCategory>>(new Set(['HVAC']));
+  const [search, setSearch] = useState('');
 
-  const toggleCat = (cat: SymbolCategory) => {
+  const toggleCat = (cat: ExtendedCategory) => {
     setExpandedCats(prev => {
       const next = new Set(prev);
       next.has(cat) ? next.delete(cat) : next.add(cat);
@@ -63,6 +52,15 @@ export function LeftSidebar() {
   const pickSymbol = (symbol: MEPSymbol) => {
     setActiveSymbolId(symbol.id);
     setActiveTool('symbol');
+  };
+
+  // Filter symbols by search term
+  const matchesSearch = (sym: MEPSymbol) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return sym.name.toLowerCase().includes(q)
+      || sym.tagPrefix.toLowerCase().includes(q)
+      || sym.id.toLowerCase().includes(q);
   };
 
   return (
@@ -128,12 +126,25 @@ export function LeftSidebar() {
       <div className="sidebar-section sidebar-section--symbols">
         <div className="section-header">
           <span className="bracket-label">╔ SYMBOLS ╗</span>
+          <span className="sym-total-badge">{lib.symbols.length}</span>
         </div>
 
-        {SYMBOL_CATEGORIES.map(cat => {
-          const symbols = getByCategory(cat);
-          const expanded = expandedCats.has(cat);
-          const color = CATEGORY_COLORS[cat];
+        <input
+          className="sym-search"
+          type="text"
+          placeholder="Search symbols..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+
+        {lib.loading && <p className="sym-loading">Syncing library...</p>}
+
+        {lib.categories.map(cat => {
+          const allInCat = lib.byCategory(cat);
+          const filtered = allInCat.filter(matchesSearch);
+          if (search && filtered.length === 0) return null;
+          const expanded = expandedCats.has(cat) || !!search;
+          const color = lib.categoryColor(cat);
 
           return (
             <div key={cat} className="sym-category">
@@ -144,19 +155,19 @@ export function LeftSidebar() {
               >
                 <span className="sym-cat-arrow">{expanded ? '▾' : '▸'}</span>
                 <span className="sym-cat-name" style={{ color }}>{cat}</span>
-                <span className="sym-cat-count">{symbols.length}</span>
+                <span className="sym-cat-count">{search ? `${filtered.length}/${allInCat.length}` : allInCat.length}</span>
               </button>
 
               {expanded && (
                 <div className="sym-grid">
-                  {symbols.map(sym => (
+                  {(search ? filtered : allInCat).map(sym => (
                     <button
                       key={sym.id}
                       className={`sym-item ${activeSymbolId === sym.id && activeTool === 'symbol' ? 'active' : ''}`}
                       onClick={() => pickSymbol(sym)}
                       title={sym.name}
                     >
-                      <SymbolThumb symbol={sym} active={activeSymbolId === sym.id && activeTool === 'symbol'} />
+                      <SymbolThumb symbol={sym} active={activeSymbolId === sym.id && activeTool === 'symbol'} buildSvg={lib.buildSvg} />
                       <span className="sym-item-label">{sym.tagPrefix}</span>
                     </button>
                   ))}
