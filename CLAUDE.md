@@ -47,15 +47,26 @@ designCTRL/
     styles/
       globals.css
     components/
-      HeaderBar.tsx
-      LeftSidebar.tsx
-      CenterCanvas.tsx
-      RightPanel.tsx
+      HeaderBar.tsx         — accent picker, undo/redo, TB button, PDF export
+      LeftSidebar.tsx       — tool buttons, symbol picker, layer selector
+      CenterCanvas.tsx      — Fabric canvas, grid, sheet tab bar
+      RightPanel.tsx        — properties/layers/equipment schedule tabs
       StatusBar.tsx
       LiquidGlassPanel.tsx
+      TitleBlockModal.tsx   — project title block editor (Phase 4)
     stores/
-      useDesignStore.ts
-      useCanvasStore.ts
+      useDesignStore.ts     — tools, layers, appearance, accent
+      useCanvasStore.ts     — canvas ref, undo/redo history
+      useSheetStore.ts      — multi-sheet management, title block data (Phase 4)
+    hooks/
+      useCanvasTools.ts     — 8 drawing tool behaviors
+      useKeyboardShortcuts.ts
+      useLayerSync.ts
+    symbols/
+      index.ts              — 35 MEP SVG symbols (5 categories)
+    utils/
+      csvExport.ts          — equipment schedule → CSV
+      pdfExport.ts          — current sheet → PDF via jsPDF (Phase 4)
 ```
 
 ## Commands
@@ -64,6 +75,68 @@ designCTRL/
 - `npm run build` — production build
 - `npm run preview` — preview production build
 - `npx tsc --noEmit` — type check
+
+---
+
+## Build Phases
+
+### Phase 1 — COMPLETE
+Live canvas with all 8 tool behaviors, undo/redo (50-entry history), grid snap,
+keyboard shortcuts, real properties panel, appearance mode CSS (classic / glassmorphism /
+cyberpunk), accent color picker (7 colors).
+
+### Phase 2 — COMPLETE
+MEP symbol library (35 symbols, 5 categories: HVAC, Piping, Ductwork, Electrical,
+Fire Protection). Layer system (5 MEP layers). Active layer tagging on canvas objects.
+Expandable symbol picker UI in left sidebar.
+
+### Phase 3 — COMPLETE
+Equipment data model — auto-tag (AHU-1, VAV-2, etc.), custom Fabric object properties
+(uid, tag, equipDesc, equipMfr, equipModel, equipSpecs, equipNotes). Equipment schedule
+table in right panel with live sync. CSV export.
+
+### Phase 4 — COMPLETE
+Multi-sheet management (add / rename / delete / switch sheets, canvas JSON persisted
+per sheet). Engineering title block (9 project fields, modal editor). PDF export via
+jsPDF — raster canvas + vector title block, page-size selector (ANSI B/D, Letter, A4, A1).
+Symbol rendering fix — explicit width/height on SVG elements for correct Fabric scaling.
+
+### Phase 5 — NOT STARTED
+**P&ID / Flow Diagrams**
+- Integrate @antv/X6 (MIT) for node-edge diagrams — P&ID, control diagrams, sequence
+  of operations
+- Equipment connection lines (supply/return/control signal/power)
+- System schematic view alongside the plan-view canvas
+- Export schematic as PDF sheet
+
+**DXF Import / Export**
+- dxf-parser (MIT) — import DWG/DXF files: LINE, POLYLINE, CIRCLE, ARC, TEXT, INSERT
+- Map DXF layers to MEP layer system
+- Export canvas as DXF for hand-off to AutoCAD/Revit workflows
+
+**Submittal Package Generator**
+- Submittal log with status tracking (submitted / approved / rejected / resubmit)
+- Auto-populate from equipment schedule (tag, mfr, model, specs)
+- Generate submittal cover sheet PDF
+- Link to spec sections
+
+**Commissioning Checklists**
+- Pre-functional / functional test checklists per equipment type
+- Auto-generate from equipment schedule
+- Pass/fail logging with date and technician initials
+- Export as PDF report
+
+**Real-time Collaboration** (stretch)
+- Yjs + weavejs (MIT) — CRDT-based multi-user editing
+- Presence cursors, user color coding
+- Conflict-free canvas object sync
+
+**3D Viewport** (stretch)
+- Three.js — 3D scene alongside 2D plan
+- web-ifc + @thatopen/components — IFC/BIM import
+- opencascade.js — solid modeling for equipment geometry
+
+---
 
 ## Future Libraries (planned, not yet integrated)
 - @antv/X6 (MIT) — P&ID, control diagrams, equipment connections
