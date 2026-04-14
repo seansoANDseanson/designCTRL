@@ -1,8 +1,24 @@
 import { useEffect, useRef } from 'react';
 import { Line, Rect, Ellipse, IText, FabricImage } from 'fabric';
+import type { Canvas } from 'fabric';
+import { v4 as uuidv4 } from 'uuid';
 import { useCanvasStore } from '../stores/useCanvasStore';
 import { useDesignStore, type AccentColor } from '../stores/useDesignStore';
 import { getSymbol, symbolDataUrl } from '../symbols/index';
+
+/** Auto-number tags: scans canvas for existing prefix, returns next e.g. AHU-3 */
+function nextTag(canvas: Canvas, prefix: string): string {
+  const nums = canvas.getObjects()
+    .filter(o => (o as any).tagPrefix === prefix)
+    .map(o => {
+      const t = (o as any).tag as string | undefined;
+      if (!t) return 0;
+      const n = parseInt(t.split('-').pop() ?? '0', 10);
+      return isNaN(n) ? 0 : n;
+    });
+  const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+  return `${prefix}-${next}`;
+}
 
 const GRID_SIZE = 20;
 
@@ -366,19 +382,28 @@ export function useCanvasTools() {
           const img = await FabricImage.fromURL(url);
           const scaleX = symbol.defaultW / (img.width || 60);
           const scaleY = symbol.defaultH / (img.height || 60);
+          const tag = nextTag(canvas, symbol.tagPrefix);
           img.set({
             left: pt.x - symbol.defaultW / 2,
             top: pt.y - symbol.defaultH / 2,
             scaleX, scaleY,
             selectable: true, evented: true,
           });
-          (img as any).symbolId = symbol.id;
-          (img as any).layerId = activeLayerId;
+          // Core identity
+          (img as any).uid       = uuidv4();
+          (img as any).symbolId  = symbol.id;
+          (img as any).layerId   = activeLayerId;
           (img as any).tagPrefix = symbol.tagPrefix;
+          (img as any).tag       = tag;
+          // Equipment schedule fields (editable in RightPanel)
+          (img as any).equipDesc  = symbol.name;
+          (img as any).equipMfr   = '';
+          (img as any).equipModel = '';
+          (img as any).equipSpecs = '';
+          (img as any).equipNotes = '';
           canvas.add(img);
           canvas.setActiveObject(img);
           saveHistory();
-          // Re-apply non-selectable since still in symbol mode
           img.selectable = false; img.evented = false;
           canvas.renderAll();
         } catch (e) {

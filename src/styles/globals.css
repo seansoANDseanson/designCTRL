@@ -336,6 +336,51 @@ html, body, #root {
 .lgp-close:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
 .lgp-body { padding: 16px; }
 
+/* ─── EQUIPMENT SCHEDULE ─────────────────────────────────────────────────── */
+.equip-badge {
+  display: inline-block; background: var(--accent-current);
+  color: var(--bg-primary); font-size: 8px; font-weight: 700;
+  padding: 1px 4px; border-radius: 8px; margin-left: 3px; vertical-align: middle;
+}
+.equip-identity   { margin-bottom: 4px; }
+.equip-schedule-header { display: flex; align-items: center; justify-content: space-between; }
+.csv-btn {
+  background: rgba(var(--accent-rgb), 0.15);
+  border: 1px solid var(--accent-current);
+  color: var(--accent-current);
+  font-family: var(--font-mono); font-size: 9px;
+  padding: 2px 7px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: all 0.15s ease; letter-spacing: 1px;
+}
+.csv-btn:hover { background: rgba(var(--accent-rgb), 0.3); }
+
+.equip-table-wrap { overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 200px); }
+.equip-table {
+  width: 100%; border-collapse: collapse;
+  font-family: var(--font-mono); font-size: 9px;
+}
+.equip-table th {
+  position: sticky; top: 0;
+  background: var(--bg-elevated);
+  color: var(--accent-current);
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 5px 6px; text-align: left;
+  border-bottom: 1px solid var(--border-accent);
+  white-space: nowrap;
+}
+.equip-row {
+  cursor: pointer; transition: background 0.1s ease;
+  border-bottom: 1px solid var(--border-primary);
+}
+.equip-row:hover { background: var(--bg-elevated); }
+.equip-table td  { padding: 5px 6px; vertical-align: top; }
+.equip-tag       { color: var(--accent-current); font-weight: 700; white-space: nowrap; }
+.equip-cat       { color: var(--text-muted); white-space: nowrap; }
+.equip-desc      { color: var(--text-primary); }
+.equip-specs     { color: var(--text-secondary); }
+
+.prop-input--tag { color: var(--accent-current); font-weight: 700; }
+
 /* ─── ACTIVE LAYER SELECTOR ──────────────────────────────────────────────── */
 .layer-select      { display: flex; flex-direction: column; gap: 2px; }
 .layer-select-btn  {

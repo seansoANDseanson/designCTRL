@@ -32,7 +32,10 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     const { canvas, history, historyIndex } = get();
     if (!canvas) return;
     // Serialize canvas, excluding grid lines (excludeFromExport: true)
-    const json = JSON.stringify(canvas.toJSON(['layerId', 'tag', 'symbolType']));
+    const json = JSON.stringify(canvas.toJSON([
+      'layerId', 'symbolId', 'tagPrefix', 'tag', 'uid',
+      'equipDesc', 'equipMfr', 'equipModel', 'equipSpecs', 'equipNotes',
+    ]));
     const sliced = history.slice(0, historyIndex + 1);
     sliced.push(json);
     const trimmed = sliced.length > MAX_HISTORY ? sliced.slice(sliced.length - MAX_HISTORY) : sliced;
