@@ -564,7 +564,8 @@ export function getByCategory(cat: SymbolCategory): MEPSymbol[] {
 
 /** Build a full SVG string for a symbol with given stroke color */
 export function buildSvgString(symbol: MEPSymbol, color = 'currentColor'): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${symbol.viewBox}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${symbol.svg}</svg>`;
+  const [,, w, h] = symbol.viewBox.split(' ').map(Number);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${symbol.viewBox}" width="${w}" height="${h}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${symbol.svg}</svg>`;
 }
 
 /** Build a data URL for use with FabricImage.fromURL */
