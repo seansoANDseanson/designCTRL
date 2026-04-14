@@ -1,0 +1,9 @@
+name = "designctrl"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "designctrl"
+
+# Pages build config — used by `wrangler pages deploy`
+# Build command: npx vite build
+# Build output: dist
