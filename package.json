@@ -11,12 +11,13 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "fabric": "^6.0.0",
+    "framer-motion": "^11.3.0",
+    "jspdf": "^4.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "zustand": "^4.5.0",
-    "framer-motion": "^11.3.0",
-    "fabric": "^6.0.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
