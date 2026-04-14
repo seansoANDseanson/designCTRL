@@ -4,6 +4,7 @@ import { useCanvasStore } from '../stores/useCanvasStore';
 import { useDesignStore } from '../stores/useDesignStore';
 import { useCanvasTools } from '../hooks/useCanvasTools';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { useLayerSync } from '../hooks/useLayerSync';
 
 const GRID_SIZE = 20;
 
@@ -44,6 +45,7 @@ export function CenterCanvas() {
   // Activate tool behaviors and keyboard shortcuts
   useCanvasTools();
   useKeyboardShortcuts();
+  useLayerSync();
 
   // --- Canvas initialization ---
   useEffect(() => {

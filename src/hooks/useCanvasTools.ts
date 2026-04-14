@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Line, Rect, Ellipse, IText } from 'fabric';
+import { Line, Rect, Ellipse, IText, FabricImage } from 'fabric';
 import { useCanvasStore } from '../stores/useCanvasStore';
 import { useDesignStore, type AccentColor } from '../stores/useDesignStore';
+import { getSymbol, symbolDataUrl } from '../symbols/index';
 
 const GRID_SIZE = 20;
 
@@ -37,9 +38,12 @@ export function useCanvasTools() {
   const canvas = useCanvasStore(s => s.canvas);
   const saveHistory = useCanvasStore(s => s.saveHistory);
   const historyVersion = useCanvasStore(s => s.historyVersion);
-  const { activeTool, snapEnabled, accentColor, setSelectedObjectIds } = useDesignStore();
+  const { activeTool, snapEnabled, accentColor, activeSymbolId, activeLayerId, setSelectedObjectIds } = useDesignStore();
 
   const ds = useRef<DrawState>({ isDrawing: false, startX: 0, startY: 0, preview: null });
+
+  // Tag a committed canvas object with the active layer
+  const tag = (obj: any) => { obj.layerId = activeLayerId; };
 
   useEffect(() => {
     if (!canvas) return;
@@ -148,6 +152,7 @@ export function useCanvasTools() {
         const line = new Line([st.startX, st.startY, pt.x, pt.y], {
           stroke: accent, strokeWidth: 1.5, selectable: true, evented: true,
         });
+        tag(line);
         canvas.add(line);
         saveHistory();
         // Re-apply non-selectable since we're still in line mode
@@ -202,6 +207,7 @@ export function useCanvasTools() {
           fill: 'transparent', stroke: accent, strokeWidth: 1.5,
           selectable: true, evented: true,
         });
+        tag(rect);
         canvas.add(rect);
         saveHistory();
         rect.selectable = false; rect.evented = false;
@@ -255,6 +261,7 @@ export function useCanvasTools() {
           fill: 'transparent', stroke: accent, strokeWidth: 1.5,
           selectable: true, evented: true,
         });
+        tag(ellipse);
         canvas.add(ellipse);
         saveHistory();
         ellipse.selectable = false; ellipse.evented = false;
@@ -280,6 +287,7 @@ export function useCanvasTools() {
           fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
           selectable: true, evented: true,
         });
+        tag(text);
         canvas.add(text);
         canvas.setActiveObject(text);
         text.enterEditing();
@@ -346,10 +354,43 @@ export function useCanvasTools() {
       };
     }
 
-    // ── SYMBOL (Phase 2 placeholder) ──────────────────────────
-    // No handlers yet — symbol picker will open here in Phase 2
+    // ── SYMBOL ────────────────────────────────────────────────
+    if (activeTool === 'symbol' && activeSymbolId) {
+      const symbol = getSymbol(activeSymbolId);
+      if (!symbol) return;
+
+      const onDown = async (opt: any) => {
+        const pt = snapPt(canvas.getScenePoint(opt.e), snapEnabled);
+        const url = symbolDataUrl(symbol, accent);
+        try {
+          const img = await FabricImage.fromURL(url);
+          const scaleX = symbol.defaultW / (img.width || 60);
+          const scaleY = symbol.defaultH / (img.height || 60);
+          img.set({
+            left: pt.x - symbol.defaultW / 2,
+            top: pt.y - symbol.defaultH / 2,
+            scaleX, scaleY,
+            selectable: true, evented: true,
+          });
+          (img as any).symbolId = symbol.id;
+          (img as any).layerId = activeLayerId;
+          (img as any).tagPrefix = symbol.tagPrefix;
+          canvas.add(img);
+          canvas.setActiveObject(img);
+          saveHistory();
+          // Re-apply non-selectable since still in symbol mode
+          img.selectable = false; img.evented = false;
+          canvas.renderAll();
+        } catch (e) {
+          console.error('Symbol placement failed', e);
+        }
+      };
+
+      canvas.on('mouse:down', onDown);
+      return () => { canvas.off('mouse:down', onDown); };
+    }
 
   // historyVersion in deps so selectability is re-applied after undo/redo
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canvas, activeTool, snapEnabled, accentColor, historyVersion]);
+  }, [canvas, activeTool, snapEnabled, accentColor, activeSymbolId, activeLayerId, historyVersion]);
 }

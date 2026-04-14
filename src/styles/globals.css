@@ -336,6 +336,81 @@ html, body, #root {
 .lgp-close:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
 .lgp-body { padding: 16px; }
 
+/* ─── ACTIVE LAYER SELECTOR ──────────────────────────────────────────────── */
+.layer-select      { display: flex; flex-direction: column; gap: 2px; }
+.layer-select-btn  {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg-tertiary); border: 1px solid var(--border-primary);
+  color: var(--text-secondary); font-family: var(--font-mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 5px 8px; border-radius: var(--radius-sm);
+  cursor: pointer; text-align: left; transition: all 0.15s ease;
+}
+.layer-select-btn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.layer-select-btn.active {
+  background: rgba(var(--accent-rgb), 0.1);
+  border-color: var(--layer-color, var(--accent-current));
+  color: var(--text-primary);
+}
+.layer-select-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* ─── SYMBOL LIBRARY ─────────────────────────────────────────────────────── */
+.sidebar-section--symbols { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+.sym-category   { margin-bottom: 2px; }
+.sym-cat-header {
+  width: 100%; display: flex; align-items: center; gap: 6px;
+  background: transparent; border: none;
+  padding: 5px 6px; border-radius: var(--radius-sm);
+  cursor: pointer; transition: background 0.15s ease;
+}
+.sym-cat-header:hover { background: var(--bg-tertiary); }
+.sym-cat-arrow  { color: var(--text-muted); font-size: 10px; width: 10px; }
+.sym-cat-name   { font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+                  text-transform: uppercase; letter-spacing: 1px; flex: 1; }
+.sym-cat-count  { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);
+                  background: var(--bg-elevated); padding: 1px 5px;
+                  border-radius: 10px; }
+
+.sym-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
+            padding: 4px 2px 6px; }
+
+.sym-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--bg-tertiary); border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm); padding: 6px 2px 4px;
+  cursor: pointer; transition: all 0.15s ease;
+  color: var(--text-muted);
+}
+.sym-item:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-accent);
+  color: var(--text-secondary);
+}
+.sym-item.active {
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: var(--accent-current);
+  color: var(--accent-current);
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.2);
+}
+
+.sym-thumb {
+  width: 36px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+}
+.sym-thumb svg {
+  width: 100%; height: 100%;
+  color: inherit;
+  stroke: currentColor;
+}
+.sym-item-label {
+  font-family: var(--font-mono); font-size: 7px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: inherit; line-height: 1;
+}
+
 /* ─── APPEARANCE MODES ───────────────────────────────────────────────────── */
 
 /* GLASSMORPHISM */
