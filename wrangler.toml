@@ -7,3 +7,9 @@ name = "designctrl"
 # Pages build config — used by `wrangler pages deploy`
 # Build command: npx vite build
 # Build output: dist
+
+# D1 database binding — symbol library
+[[d1_databases]]
+binding = "DB"
+database_name = "designctrl-symbols"
+database_id = "0ac97764-9506-4d8e-97fd-9157a758a258"

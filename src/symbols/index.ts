@@ -9,7 +9,7 @@ export interface MEPSymbol {
   svg: string;         // inner SVG elements; uses currentColor for stroke/fill
 }
 
-export type SymbolCategory = 'HVAC' | 'PIPING' | 'ELECTRICAL' | 'CONTROLS' | 'FIRE';
+export type SymbolCategory = 'HVAC' | 'PIPING' | 'DUCTWORK' | 'ELECTRICAL' | 'CONTROLS' | 'FIRE';
 
 // ─── HVAC ──────────────────────────────────────────────────────────────────
 const HVAC: MEPSymbol[] = [
@@ -555,7 +555,17 @@ export const SYMBOL_CATEGORIES: SymbolCategory[] = [
 ];
 
 export function getSymbol(id: string): MEPSymbol | undefined {
-  return ALL_SYMBOLS.find(s => s.id === id);
+  // Check bundled set first, then localStorage cache from API
+  const bundled = ALL_SYMBOLS.find(s => s.id === id);
+  if (bundled) return bundled;
+  try {
+    const cached = localStorage.getItem('designctrl-symbols');
+    if (cached) {
+      const arr = JSON.parse(cached) as MEPSymbol[];
+      return arr.find(s => s.id === id);
+    }
+  } catch { /* ignore */ }
+  return undefined;
 }
 
 export function getByCategory(cat: SymbolCategory): MEPSymbol[] {
